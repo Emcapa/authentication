@@ -6,19 +6,26 @@ import (
 
 func main() {
 	key := []byte("F3BFC2F8-7512-4063-8461-D209A2E8DA88")
-	token, _ := createToken("Obi-Wan Kenobi", "ben@kenobi.com", "Jedi Master", key)
-	payload, _, _ := jose.Decode(token, []byte("F3BFC2F8-7512-4063-8461-D209A2E8DA88"))
+	tokenString := formatTokenString("Obi-Wan Kenobi", "ben@kenobi.com", "Jedi Master")
+	token, _ := createToken(tokenString, key)
+	payload, _, _ := jose.Decode(token, key)
 	println("Signature: " + token)
-	println("Verified to: " + payload)
+	println("Decoded to: " + payload)
+	print("Original String: " + tokenString)
+	println("Is the decoded string equal to original string? ", tokenString == payload)
 }
 
-func createToken(name string, email string, roles string, key []byte) (string, error) {
-	payload := `
+func formatTokenString(name string, email string, roles string) string {
+	formattedTokenString := `
 {
-    "name": , ` + name + `,
+    "name": ` + name + `,
     "email": ` + email + `,
     "roles": ` + roles + `
 }
 `
-	return jose.Sign(payload, jose.HS256, key)
+	return formattedTokenString
+}
+
+func createToken(tokenString string, key []byte) (string, error) {
+	return jose.Sign(tokenString, jose.HS256, key)
 }
